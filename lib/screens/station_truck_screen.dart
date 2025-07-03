@@ -4,258 +4,282 @@ import 'package:inventory_adminpanel/controllers/station_truck_controller.dart';
 
 class StationTruckScreen extends StatelessWidget {
   StationTruckScreen({super.key});
-
   final StationTruckController controller = Get.put(StationTruckController());
-  final TextEditingController truckController = TextEditingController();
-  final TextEditingController newStationController = TextEditingController();
+  static final TextEditingController searchController = TextEditingController();
+  final TextEditingController stationController = TextEditingController();
 
   void showAddStationDialog(BuildContext context) {
-    final bgColor = Theme.of(context).scaffoldBackgroundColor;
-
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder:
-          (_) => AlertDialog(
-            title: const Text('Add New Station'),
-            content: SizedBox(
-              width: 400,
-              child: TextField(
-                controller: newStationController,
-                decoration: InputDecoration(
-                  hintText: 'Station Name',
-                  prefixIcon: const Icon(Icons.location_city),
-                  filled: true,
-                  fillColor: bgColor,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+          (_) => Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Material(
+                elevation: 10,
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 20,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        '➕ Add New Station',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: stationController,
+                        decoration: InputDecoration(
+                          // labelText: 'Station Name',
+                          hintText: 'Enter station name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          prefixIcon: const Icon(Icons.location_on_outlined),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Cancel'),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () {
+                              controller.addStation(
+                                stationController.text.trim(),
+                              );
+                              stationController.clear();
+                              Navigator.pop(context);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text('Add'),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  controller.addStation(newStationController.text.trim());
-                  newStationController.clear();
-                  Navigator.pop(context);
-                },
-                child: const Text('Add'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-            ],
           ),
     );
   }
 
-  void showEditTruckDialog(BuildContext context, int index, String truck) {
-    final TextEditingController editController = TextEditingController(
-      text: truck,
-    );
-    showDialog(
-      context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('Edit Truck'),
-            content: TextField(
-              controller: editController,
-              decoration: const InputDecoration(border: OutlineInputBorder()),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  controller.editTruck(index, editController.text.trim());
-                  Navigator.pop(context);
-                },
-                child: const Text('Save'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
-    );
-  }
-
-  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Station & Truck Management'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_location_alt_outlined),
-            onPressed: () => showAddStationDialog(context),
-          ),
-          Obx(() {
-            if (controller.selectedStation.value == null) {
-              return const SizedBox();
-            }
-            return IconButton(
-              icon: const Icon(Icons.delete_forever),
-              tooltip: "Delete selected station",
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder:
-                      (_) => AlertDialog(
-                        title: const Text("Delete Station"),
-                        content: Text(
-                          "Are you sure you want to delete station '${controller.selectedStation.value}'? All trucks will be lost.",
-                        ),
-                        actions: [
-                          ElevatedButton(
-                            onPressed: () {
-                              controller.deleteStation(
-                                controller.selectedStation.value!,
-                              );
-                              Navigator.pop(context);
-                            },
-                            child: const Text("Delete"),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("Cancel"),
-                          ),
-                        ],
-                      ),
-                );
-              },
-            );
-          }),
-        ],
-      ),
+      appBar: AppBar(title: const Text('Station & Truck Passcode Assignment')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Obx(
           () => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Select Station',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: controller.selectedStation.value,
-                hint: const Text('Choose a station'),
-                items:
-                    controller.stations
-                        .map(
-                          (station) => DropdownMenuItem(
-                            value: station,
-                            child: Text(station),
-                          ),
-                        )
-                        .toList(),
-                onChanged: (val) {
-                  if (val != null) controller.onStationSelected(val);
-                },
-                decoration: const InputDecoration(border: OutlineInputBorder()),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'Truck Passcode',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text("Search User by Email, Name or Phone"),
               const SizedBox(height: 8),
               TextField(
-                controller: truckController,
+                controller: searchController,
+                onChanged: (val) => controller.searchUsersByText(val),
                 decoration: const InputDecoration(
-                  hintText: 'Enter truck passcode',
+                  hintText: "Type name, email or phone...",
+                  prefixIcon: Icon(Icons.search),
                   border: OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (controller.selectedStation.value == null ||
-                        truckController.text.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            "Please select a station and enter truck number",
-                          ),
+              const SizedBox(height: 8),
+              if (controller.userSearchResults.isNotEmpty)
+                SizedBox(
+                  height: 70,
+                  child: ListView.builder(
+                    itemCount: controller.userSearchResults.length,
+                    itemBuilder: (_, i) {
+                      final user = controller.userSearchResults[i];
+                      final isSelected =
+                          controller.selectedUser.value?['uid'] == user['uid'];
+                      return Container(
+                        color:
+                            isSelected
+                                ? Colors.green.withOpacity(0.2)
+                                : Colors.grey.withOpacity(0.1),
+                        child: ListTile(
+                          title: Text(user['fullName'] ?? 'No Name'),
+                          subtitle: Text(user['email']),
+
+                          trailing:
+                              isSelected
+                                  ? ElevatedButton(
+                                    onPressed:
+                                        () => controller.selectUser(user),
+                                    child: const Text("Select"),
+                                  )
+                                  : Text(
+                                    "User is Already Selected",
+                                    style: TextStyle(color: Colors.green),
+                                  ),
                         ),
                       );
-                      return;
-                    }
-                    controller.addTruck(truckController.text.trim());
-                    truckController.clear();
-                  },
-                  child: const Text('Add Truck'),
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (controller.selectedStation.value != null)
-                Expanded(
-                  child: Obx(
-                    () => ListView.builder(
-                      itemCount: controller.passCodes.length,
-                      itemBuilder: (context, index) {
-                        final truck = controller.passCodes[index];
-                        return Card(
-                          child: ListTile(
-                            title: Text(truck),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed:
-                                      () => showEditTruckDialog(
-                                        context,
-                                        index,
-                                        truck,
-                                      ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete,
-                                    color: Colors.red,
-                                  ),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (_) => AlertDialog(
-                                            title: const Text("Delete Truck"),
-                                            content: Text(
-                                              "Are you sure you want to delete truck '$truck'?",
-                                            ),
-                                            actions: [
-                                              ElevatedButton(
-                                                onPressed: () {
-                                                  controller.deleteTruck(truck);
-                                                  Navigator.pop(context);
-                                                },
-                                                child: const Text("Delete"),
-                                              ),
-                                              TextButton(
-                                                onPressed:
-                                                    () =>
-                                                        Navigator.pop(context),
-                                                child: const Text("Cancel"),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                    },
                   ),
                 ),
+
+              // const Divider(height: 12),
+              if (controller.selectedUser.value != null)
+                Text(
+                  "Selected User: ${controller.selectedUser.value!['email']}",
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+
+              const SizedBox(height: 16),
+              const Text("Select Station"),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: controller.selectedStation.value,
+                      hint: const Text('Choose a station'),
+                      items:
+                          controller.stations
+                              .map(
+                                (station) => DropdownMenuItem(
+                                  value: station,
+                                  child: Text(station),
+                                ),
+                              )
+                              .toList(),
+                      onChanged:
+                          (val) => controller.selectedStation.value = val,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    tooltip: "Add new station",
+                    onPressed: () => showAddStationDialog(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: "Delete selected station",
+                    onPressed:
+                        controller.selectedStation.value != null
+                            ? () => controller.deleteStation(
+                              controller.selectedStation.value!,
+                            )
+                            : null,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+              const Text("Assign Truck Passcode"),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      onChanged: (v) => controller.passcodeController.value = v,
+                      decoration: InputDecoration(
+                        hintText: 'Enter or generate passcode',
+                        border: const OutlineInputBorder(),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.refresh),
+                          tooltip: "Generate random passcode",
+                          onPressed: () {
+                            controller.passcodeController.value =
+                                controller.generateRandomPasscode();
+                          },
+                        ),
+                      ),
+                      controller: TextEditingController(
+                        text: controller.passcodeController.value,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 48),
+                ),
+                icon: const Icon(Icons.check),
+                label: const Text("Assign Passcode"),
+                onPressed: controller.assignPasscodeToUser,
+              ),
+
+              const Divider(height: 32),
+              const Text(
+                "🚛 Active Users with Passcodes",
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child:
+                    controller.activeUsers.isEmpty
+                        ? const Center(child: Text("No active users yet."))
+                        : ListView.builder(
+                          itemCount: controller.activeUsers.length,
+                          itemBuilder: (_, i) {
+                            final user = controller.activeUsers[i];
+                            final isUsed = user['isUsed'] == true;
+
+                            return Card(
+                              child: ListTile(
+                                leading: Icon(
+                                  Icons.circle,
+                                  color: isUsed ? Colors.green : Colors.red,
+                                  size: 16,
+                                ),
+                                title: Text("Name: ${user['fullName']}"),
+                                subtitle: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Email: ${user['email']}"),
+                                    Text("Passcode: ${user['passcode']}"),
+                                    Text("Station: ${user['station']}"),
+                                  ],
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.logout),
+                                  tooltip:
+                                      isUsed
+                                          ? "Logout this user"
+                                          : "Already logged out",
+                                  onPressed:
+                                      isUsed
+                                          ? () => controller.logoutUser(
+                                            user['docId'],
+                                          )
+                                          : null,
+                                  color: isUsed ? Colors.red : Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+              ),
             ],
           ),
         ),

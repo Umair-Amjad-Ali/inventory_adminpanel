@@ -85,3 +85,33 @@ class UserController extends GetxController {
     fetchUsers(reset: true);
   }
 }
+
+// Future<void> searchUsers(String query) async {
+  //   if (query.isEmpty) {
+  //     userSearchResults.clear();
+  //     return;
+  //   }
+
+  //   final snapshot = await firestore.collection(usersCollection).get();
+
+  //   userSearchResults.value =
+  //       snapshot.docs
+  //           .where((doc) {
+  //             final data = doc.data();
+  //             return data['email'].toString().toLowerCase().contains(
+  //                   query.toLowerCase(),
+  //                 ) ||
+  //                 data['fullName'].toString().toLowerCase().contains(
+  //                   query.toLowerCase(),
+  //                 ) ||
+  //                 data['phoneNumber'].toString().toLowerCase().contains(
+  //                   query.toLowerCase(),
+  //                 );
+  //           })
+  //           .map((doc) {
+  //             final data = doc.data();
+  //             data['uid'] = doc.id;
+  //             return data;
+  //           })
+  //           .toList();
+  // }
