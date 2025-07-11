@@ -115,7 +115,10 @@ class LoginScreen extends StatelessWidget {
                       passwordController.text.trim(),
                     );
                   },
-                  child: Text("Login", style: TextStyle(fontSize: 16)),
+                  child: Text(
+                    "Login",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
             ],
