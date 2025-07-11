@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:inventory_adminpanel/controllers/authentication/auth_controller.dart';
 import 'package:inventory_adminpanel/controllers/side_bar_controller.dart';
 import '../controllers/nav_controller.dart';
 
 class CustomSidebar extends StatelessWidget {
   final NavController navController = Get.find();
   final SidebarController sidebarController = Get.put(SidebarController());
+  final AuthController authController = Get.find();
 
   final List<Map<String, dynamic>> menuSections = [
     {
@@ -21,6 +23,7 @@ class CustomSidebar extends StatelessWidget {
         {"title": "User Management", "icon": Icons.people_alt},
         {"title": "Payment", "icon": Icons.payments},
         {"title": "Battery Section", "icon": Icons.battery_full},
+        {"title": "Truck Management", "icon": Icons.local_shipping},
       ],
     },
   ];
@@ -179,7 +182,9 @@ class CustomSidebar extends StatelessWidget {
                   fontSize: (screenWidth * 0.012).clamp(13.0, 15.0),
                 ),
               ),
-              onTap: () {},
+              onTap: () {
+                authController.logout();
+              },
             ),
           ),
         ],

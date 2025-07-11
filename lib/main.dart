@@ -1,22 +1,29 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:get/instance_manager.dart';
-import 'package:inventory_adminpanel/firebase_options.dart';
+import 'package:get/get.dart';
+import 'package:inventory_adminpanel/controllers/authentication/auth_controller.dart';
+import 'package:inventory_adminpanel/screens/auth/login_screen.dart';
+import 'package:inventory_adminpanel/screens/truck/truck_screen.dart';
+import 'firebase_options.dart';
 import 'controllers/nav_controller.dart';
-import 'widgets/custom_sidebar.dart';
-import 'widgets/responsive_layout.dart';
 import 'screens/aa_member_screen.dart';
 import 'screens/station_truck_screen.dart';
 import 'screens/user_screen.dart';
 import 'screens/payment_screen.dart';
 import 'screens/battery_screen.dart';
+import 'widgets/custom_sidebar.dart';
+import 'widgets/responsive_layout.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(AdminPanelApp());
+
+  await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+
+  Get.put(AuthController());
+
+  runApp(const AdminPanelApp());
 }
 
 class AdminPanelApp extends StatelessWidget {
@@ -24,11 +31,14 @@ class AdminPanelApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Get.find<AuthController>();
     return GetMaterialApp(
       title: 'Admin Panel',
-      theme: ThemeData.dark(),
-      home: AdminHomePage(),
       debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: Obx(() {
+        return auth.isLoggedIn.value ? AdminHomePage() : LoginScreen();
+      }),
     );
   }
 }
@@ -42,6 +52,7 @@ class AdminHomePage extends StatelessWidget {
     UserScreen(),
     PaymentScreen(),
     BatteryScreen(),
+    TruckScreen(),
   ];
 
   AdminHomePage({super.key});
